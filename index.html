@@ -129,7 +129,9 @@ textarea{min-height:80px;resize:vertical}
 /* Shop illustration */
 .shop-art{width:100%;max-width:320px;margin:0 auto 8px}
 .shop-art svg{width:100%;height:auto;display:block;filter:drop-shadow(0 6px 12px rgba(255,111,159,.2))}
-html,body,*{touch-action:pan-x pan-y}
+html,body,*{touch-action:manipulation;-webkit-text-size-adjust:100%}
+html,body{touch-action:pan-x pan-y;overscroll-behavior:none;-ms-touch-action:pan-x pan-y}
+button,a,input,select,textarea,[onclick]{touch-action:manipulation}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text;font-size:16px}
 .cust-order{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:4}
@@ -152,6 +154,44 @@ input,textarea{-webkit-user-select:text;user-select:text;font-size:16px}
 ['gesturestart','gesturechange','gestureend'].forEach(e=>document.addEventListener(e,ev=>ev.preventDefault(),{passive:false}));
 document.addEventListener('touchmove',ev=>{if(ev.touches.length>1)ev.preventDefault()},{passive:false});
 addEventListener('wheel',ev=>{if(ev.ctrlKey)ev.preventDefault()},{passive:false});
+/* chặn zoom khi chạm nhanh 2 lần (iOS/Android) nhưng vẫn giữ nguyên thao tác bấm */
+let _lastTap=0;
+document.addEventListener('touchend',ev=>{
+const n=Date.now();
+if(n-_lastTap<350&&ev.touches.length===0){
+ev.preventDefault();
+const t=ev.target;
+if(t&&t.click&&!(t.matches&&t.matches('input,textarea,select,a')))t.click()
+}
+_lastTap=n
+},{passive:false});
+document.addEventListener('dblclick',ev=>ev.preventDefault(),{passive:false});
+/* ===== KHOÁ ZOOM TRIỆT ĐỂ (iOS Safari/Chrome, Android, máy tính) ===== */
+(function(){
+const opt={passive:false,capture:true};
+const stop=e=>{e.preventDefault();e.stopPropagation&&e.stopPropagation()};
+['gesturestart','gesturechange','gestureend'].forEach(n=>{window.addEventListener(n,stop,opt);document.addEventListener(n,stop,opt)});
+// Chạm từ 2 ngón trở lên → chặn (pinch)
+['touchstart','touchmove'].forEach(n=>document.addEventListener(n,e=>{if((e.touches&&e.touches.length>1)||(e.scale&&e.scale!==1))e.preventDefault()},opt));
+// Meta viewport luôn khoá
+const meta=document.querySelector('meta[name=viewport]');
+const LOCK='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover';
+function relock(){if(!meta)return;meta.setAttribute('content',LOCK)}
+// Nếu trình duyệt vẫn zoom được → ép về 100% ngay
+function resetZoom(){
+const vv=window.visualViewport;
+if(vv&&Math.abs(vv.scale-1)>0.01){
+if(meta){meta.setAttribute('content','width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no');
+setTimeout(relock,60)}
+window.scrollTo(0,window.scrollY)
+}
+}
+if(window.visualViewport){visualViewport.addEventListener('resize',resetZoom);visualViewport.addEventListener('scroll',()=>{if(Math.abs(visualViewport.scale-1)>0.01)resetZoom()})}
+document.addEventListener('focusout',()=>setTimeout(resetZoom,120));
+relock();
+})();
+/* chặn Ctrl + / Ctrl - / Ctrl 0 trên máy tính */
+addEventListener('keydown',ev=>{if((ev.ctrlKey||ev.metaKey)&&['+','-','=','0','_'].includes(ev.key))ev.preventDefault()});
 addEventListener('keydown',ev=>{if((ev.ctrlKey||ev.metaKey)&&'+-=_0'.includes(ev.key))ev.preventDefault()});
 
 /* ===== PWA ===== */
