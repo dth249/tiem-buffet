@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Buffet Nhỏ">
 <meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍲</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍲</text></svg>">
 <title>Tiệm Buffet Nhỏ</title>
@@ -15,7 +18,9 @@
 :root{--bg:#fffaf8;--card:#ffffff;--ink:#6b3a4e;--mute:#b48a9c;--acc:#ff6f9f;--acc2:#ff9dbf;--ok:#2fb98a;--bad:#f0506e;--line:#ffe4ee;--star:#ffb020;--shadow:#ff3f80;--grad1:#ff8db5;--grad2:#ff5f97;color-scheme:only light}
 html{scroll-padding-top:env(safe-area-inset-top,0px);background:#fffaf8}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg,#fffaf8)!important;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center;min-height:100vh}
+button,input,textarea,select{font-family:inherit}
+svg text{font-family:"Baloo 2","Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{margin:0;background:var(--bg,#fffaf8)!important;color:var(--ink);font-family:"Nunito","Baloo 2",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center;min-height:100vh}
 #app{width:100%;max-width:440px;padding:12px 14px 110px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:6px;background:linear-gradient(135deg,var(--grad1,#ff8db5),var(--grad2,#ffb3cf));color:#fff;border-radius:20px;padding:10px 12px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;box-shadow:0 4px 0 var(--shadow)}
 .top b{display:block;font-size:15px}.top small{color:#1a1a1a;opacity:1;font-size:12px;font-weight:600}
@@ -137,6 +142,17 @@ input,textarea{-webkit-user-select:text;user-select:text;font-size:16px}
 .cust-order{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:4}
 .dock{position:sticky;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:6;background:var(--bg);padding:6px 0 2px;border-top:2px solid var(--line)}
 .mk-bar{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:5;background:var(--bg);padding:6px 0}
+
+/* ===== FONT: tiêu đề / nút / số tiền = Baloo 2 (tròn, dễ thương) · nội dung / tab / ô nhập = Nunito — cả hai đều hỗ trợ đủ tiếng Việt ===== */
+:root{--f-title:"Baloo 2","Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--f-body:"Nunito","Baloo 2",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body,p,small,span,div,li,label,.bub,.log,.set-item,.card,.mu,.credit,.load-sub{font-family:var(--f-body)}
+h1,h2,h3,h4,.top b,.hero h1,.mb h3,.menu-board h3,.load-title,.tag,.clock,.grid b,.sec-label,.menu-board .sec{font-family:var(--f-title);letter-spacing:.2px}
+button,.load-btns button,.mb button,.reply-btn,.bell,button.pri{font-family:var(--f-title);font-weight:600;letter-spacing:.2px}
+#tabs button,.opt,.dish-btn,.set-item .lab,.set-item .val,.theme-cell{font-family:var(--f-body)}
+#tabs button{font-weight:700}
+.money,.money-tag,.pop,.chip,.qty-badge,.menu-board .ml b,.load-pct,.tray-item,.top .stars,.stars{font-family:var(--f-title);font-weight:600}
+.money{font-size:21px}
+input,textarea,select{font-family:var(--f-body);font-weight:600}
 </style>
 </head>
 <body>
@@ -1035,7 +1051,7 @@ function shopSvg(){return `<div class="shop-art"><svg viewBox="0 0 340 230" xmln
 <path d="M250 86 L258 112 H275 L267 86 Z" fill="#fff" opacity=".35"/>
 <!-- hanging sign -->
 <rect x="115" y="42" width="110" height="32" rx="10" fill="#fff" stroke="#ff6f9f" stroke-width="2.5"/>
-<text x="170" y="63" text-anchor="middle" font-size="14" font-weight="800" fill="#6b3a4e" font-family="system-ui,sans-serif">🍲 Buffet Nhỏ</text>
+<text x="170" y="63" text-anchor="middle" font-size="14" font-weight="800" fill="#6b3a4e" font-family="Baloo 2,Nunito,system-ui,sans-serif">🍲 Buffet Nhỏ</text>
 <!-- strings -->
 <line x1="130" y1="42" x2="125" y2="72" stroke="#ff8db5" stroke-width="1.5"/>
 <line x1="210" y1="42" x2="215" y2="72" stroke="#ff8db5" stroke-width="1.5"/>
@@ -1111,7 +1127,7 @@ function phoStallSvg(){return `<div class="shop-art" style="max-width:320px;marg
 <circle cx="250" cy="115" r="6" fill="#c0392b"/>
 <!-- sign -->
 <rect x="100" y="58" width="140" height="28" rx="8" fill="#c0392b"/>
-<text x="170" y="78" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" font-family="system-ui">🍜 PHỞ NGON</text>
+<text x="170" y="78" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" font-family="Baloo 2,Nunito,system-ui,sans-serif">🍜 PHỞ NGON</text>
 <!-- counter -->
 <rect x="70" y="145" width="200" height="28" rx="4" fill="#d4a574" stroke="#b8956a" stroke-width="1.5"/>
 <!-- bowls on counter -->
@@ -1405,7 +1421,12 @@ c.order.forEach(o=>{S.stock[o.id]=(S.stock[o.id]||0)-o.qty});
 S.ut.dua-=needDua;S.ut.bat-=needBat;
 const kids=c.ic.filter(i=>'👧👦'.includes(i)).length;
 const extra=c.order.reduce((a,o)=>a+sellOf(o.id)*o.qty,0);
-const pay=(c.ppl-kids)*S.price+kids*(S.price/2)+extra;
+const isTopId=id=>id==='ot'||TOP.some(tp=>tp.id===id);
+const dishQ=c.order.filter(o=>!isTopId(o.id)).reduce((a,o)=>a+o.qty,0);
+const payers=Math.min(c.ppl,Math.max(1,dishQ)); // chỉ tính vé cho số người thật sự có món ăn
+const adPay=Math.min(c.ppl-kids,payers),kdPay=Math.min(kids,payers-adPay);
+const ticketPay=adPay*S.price+kdPay*(S.price/2);
+const pay=ticketPay+extra;
 let s=3.5+(c.pat/100)*1.2+(S.up.deco+S.up.ac)*.2+Math.random()*.5-.25;
 if(c.pat<30)s-=1;
 s=clamp(Math.round(s),1,5);
@@ -1650,6 +1671,17 @@ if(orderMap[tp.id]>maxT)orderMap[tp.id]=maxT
 }
 if(orderMap[d.id]>(S.stock[d.id]||0))orderMap[d.id]=S.stock[d.id]||0
 })
+}
+{ // mỗi người trong đoàn gọi ít nhất 1 phần (nếu kho còn) để tiền vé khớp với món
+const dishQty=()=>avail.reduce((a,d)=>a+(orderMap[d.id]||0),0);
+let guard=0;
+while(dishQty()<ppl&&guard++<30){
+const cand=avail.filter(d=>(S.stock[d.id]||0)>(orderMap[d.id]||0));
+if(!cand.length)break;
+const d=rnd(cand);
+orderMap[d.id]=(orderMap[d.id]||0)+1;
+if(d.needOt&&(S.stock.ot||0)>(orderMap.ot||0))orderMap.ot=(orderMap.ot||0)+1
+}
 }
 const order=Object.keys(orderMap).filter(id=>orderMap[id]>0).map(id=>({id,qty:orderMap[id]}));
 let runChance=0.05;
