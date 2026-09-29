@@ -130,7 +130,7 @@ textarea{min-height:80px;resize:vertical}
 .shop-art{width:100%;max-width:320px;margin:0 auto 8px}
 .shop-art svg{width:100%;height:auto;display:block;filter:drop-shadow(0 6px 12px rgba(255,111,159,.2))}
 html,body,*{touch-action:manipulation;-webkit-text-size-adjust:100%}
-html,body{touch-action:pan-x pan-y;overscroll-behavior:none;-ms-touch-action:pan-x pan-y}
+html,body{touch-action:manipulation;touch-action:pan-x pan-y;overscroll-behavior:none;-ms-touch-action:pan-x pan-y}
 button,a,input,select,textarea,[onclick]{touch-action:manipulation}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text;font-size:16px}
@@ -154,17 +154,24 @@ input,textarea{-webkit-user-select:text;user-select:text;font-size:16px}
 ['gesturestart','gesturechange','gestureend'].forEach(e=>document.addEventListener(e,ev=>ev.preventDefault(),{passive:false}));
 document.addEventListener('touchmove',ev=>{if(ev.touches.length>1)ev.preventDefault()},{passive:false});
 addEventListener('wheel',ev=>{if(ev.ctrlKey)ev.preventDefault()},{passive:false});
-/* chặn zoom khi chạm nhanh 2 lần (iOS/Android) nhưng vẫn giữ nguyên thao tác bấm */
-let _lastTap=0;
-document.addEventListener('touchend',ev=>{
-const n=Date.now();
-if(n-_lastTap<350&&ev.touches.length===0){
-ev.preventDefault();
-const t=ev.target;
-if(t&&t.click&&!(t.matches&&t.matches('input,textarea,select,a')))t.click()
+/* chặn zoom khi chạm nhanh 2 lần (iOS Safari/Chrome + Android): bắt ở tầng window, capture */
+let _lastTap=0,_lastX=0,_lastY=0;
+window.addEventListener('touchend',ev=>{
+if(ev.touches&&ev.touches.length>0)return;
+const n=Date.now(),ct=ev.changedTouches&&ev.changedTouches[0];
+const x=ct?ct.clientX:0,y=ct?ct.clientY:0;
+const dt=n-_lastTap;
+if(dt>0&&dt<450){
+// tap thứ 2 của cú chạm đúp → huỷ hành vi zoom mặc định của trình duyệt
+if(ev.cancelable)ev.preventDefault();
+const t=document.elementFromPoint(x,y)||ev.target;
+if(t&&t.click&&!(t.matches&&t.matches('input,textarea,select,a,label')))t.click();
+_lastTap=0;return
 }
-_lastTap=n
-},{passive:false});
+_lastTap=n;_lastX=x;_lastY=y
+},{passive:false,capture:true});
+// Ép touch-action ngay trên <html>/<body> bằng JS (phòng khi CSS bị bỏ qua)
+try{document.documentElement.style.touchAction='manipulation';document.documentElement.style.webkitTextSizeAdjust='100%';addEventListener('DOMContentLoaded',()=>{document.body.style.touchAction='manipulation'})}catch(e){}
 document.addEventListener('dblclick',ev=>ev.preventDefault(),{passive:false});
 /* ===== KHOÁ ZOOM TRIỆT ĐỂ (iOS Safari/Chrome, Android, máy tính) ===== */
 (function(){
@@ -872,6 +879,21 @@ function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';cl
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({S,ts:Date.now()}))}catch(e){}}
 function load(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return null;return JSON.parse(raw).S}catch(e){return null}}
 
+/* ===== Phát hiện lời lẽ thô tục / xúc phạm khách ===== */
+function isRude(txt){
+const norm=String(txt).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d');
+const words=norm.replace(/[^a-z0-9]+/g,' ').trim();
+const flat=norm.replace(/[^a-z0-9]+/g,'');
+const tokens=new Set(words.split(' '));
+const badTok=['cut','dm','dmm','dcm','dcmm','dkm','dit','ditme','dume','dumemay','vcl','vkl','vl','vcc','cc','cl','cmm','cmn','clgt','clm','loz','lon','lol','buoi','cac','cak','deo','ngu','oc','cam','khung','dien','sung','rac','nat','xam','hoang']
+  .filter(w=>!['oc','cam','sung','rac','nat','hoang','lol'].includes(w));
+if(badTok.some(w=>tokens.has(w)))return true;
+const phrases=['d m','d m m','d c m','d k m','v c l','v k l','d i t','c m m','cut di','cut ngay','cut xuong','bien di','bien ngay','cam mom','cam di','im di','im mieng','di chet','chet di','chet me','chet tiet','me may','cha may','do ngu','thang ngu','con ngu','ngu vl','oc cho','oc lon','con cho','thang cho','do cho','suc vat','mat day','do khon','khon nan','do dien','do khung','thang dien','thang khung','con dien','rac ruoi','vo hoc','du ma','dit me','dit con','deo can','deo them','deo ban','xam lon','khong them ban','khong tiep','an cut','ra khoi quan','dep quan','dap quan','cook quan','cuoc di'];
+if(phrases.some(p=>(' '+words+' ').includes(' '+p+' ')))return true;
+const flatBad=['ditme','ditmemay','dumemay','dumay','concho','occho','matday','thangcho','dcmm','vclon','clgt','dkm','vcl','vkl','cmm'];
+return flatBad.some(w=>flat.includes(w))
+}
+const RUDE_CUST=['Chủ quán gì mà chửi khách vậy?! Mình đánh giá 1 sao!','Thái độ tệ quá, không bao giờ quay lại nữa!','Bị chủ quán mắng, mình sẽ review 1 sao cho cả xóm biết!','Quá đáng thật sự… 1 sao và block quán!'];
 function analyzeFreeReply(txt){const t=txt.toLowerCase();let mood=0;const good=['cảm ơn','xin lỗi','giảm','tặng','miễn','voucher','ưu đãi','còn chỗ','được','ok','dạ','vui','chào','hẹn'];const bad=['không','hết','từ chối','không có','đắt','không nhận','kín','hết chỗ'];good.forEach(w=>{if(t.includes(w))mood++});bad.forEach(w=>{if(t.includes(w))mood--});return mood>0?'good':mood<0?'bad':'neutral'}
 const FREE_RESP={good:[{c:'Ôi cảm ơn quán nhiều! Mình sẽ ghé ngay 💕',m:80000,r:.12},{c:'Tuyệt vời quá, mình chốt luôn nha!',m:120000,r:.1},{c:'Quán dễ thương thế, mình giới thiệu bạn bè nữa!',m:60000,r:.15},{c:'Yay! Cảm ơn em nhiều ạ 🥰',m:50000,r:.08}],neutral:[{c:'Ok bạn, mình biết rồi.',m:20000,r:0},{c:'Cảm ơn thông tin nha.',m:10000,r:0},{c:'Mình sẽ cân nhắc thêm.',m:0,r:0},{c:'Ok em.',m:15000,r:.02}],bad:[{c:'Tiếc quá… mình đi quán khác vậy.',m:0,r:-.08},{c:'Hơi thất vọng, thôi vậy.',m:0,r:-.12},{c:'Ok, cảm ơn.',m:0,r:-.05},{c:'Vậy à… buồn nhỉ.',m:0,r:-.1}]};
 
@@ -968,7 +990,11 @@ S.recentMs=(S.recentMs||[]).concat(i).slice(-Math.floor(MS.length*.6));
 S.msgs.unshift({id:S.mid++,d:i,n:cap(x[0]),ic:x[1],done:null,day:S.day,free:false})}
 S.msgs=S.msgs.slice(0,20);save()}
 function reply(id,i){const m=S.msgs.find(x=>x.id===id),o=MS[m.d].o[i];m.done=i;m.free=false;m.chips=fx(o.m,o.r);m.myReply=o.t;m.custReply=o.c;sfx('msg');save();render()}
-function freeReplyMsg(id){const txt=($('#freeMsg')?.value||'').trim();if(!txt){toast('Hãy viết gì đó!');return}const m=S.msgs.find(x=>x.id===id);if(!m||m.done!==null)return;const mood=analyzeFreeReply(txt);const resp=rnd(FREE_RESP[mood]);m.done='free';m.free=true;m.myReply=txt;m.custReply=resp.c;m.chips=fx(resp.m,resp.r);sfx('msg');save();$('#modal').style.display='none';toast(mood==='good'?'Khách vui vẻ!':'Đã gửi phản hồi');render()}
+function freeReplyMsg(id){const txt=($('#freeMsg')?.value||'').trim();if(!txt){toast('Hãy viết gì đó!');return}const m=S.msgs.find(x=>x.id===id);if(!m||m.done!==null)return;if(isRude(txt)){
+m.done='free';m.free=true;m.myReply=txt;m.custReply=rnd(RUDE_CUST);m.chips=fx(0,-1);
+S.fbs.unshift({n:m.n,ic:m.ic,s:1,t:'Chủ quán chửi khách, thái độ tệ hại! 1 sao!',day:S.day,replied:false,reply:''});S.fbs=S.fbs.slice(0,50);
+sfx('bad');save();$('#modal').style.display='none';toast(currentLang==='en'?'😡 Rude reply! Guest left 1★':'😡 Nói tục với khách! Bị đánh giá 1★');render();return}
+const mood=analyzeFreeReply(txt);const resp=rnd(FREE_RESP[mood]);m.done='free';m.free=true;m.myReply=txt;m.custReply=resp.c;m.chips=fx(resp.m,resp.r);sfx('msg');save();$('#modal').style.display='none';toast(mood==='good'?'Khách vui vẻ!':'Đã gửi phản hồi');render()}
 
 function shopSvg(){return `<div class="shop-art"><svg viewBox="0 0 340 230" xmlns="http://www.w3.org/2000/svg">
 <defs>
@@ -1563,7 +1589,7 @@ return h
 function msgTab(){if(S.th){const m=S.msgs.find(x=>x.id===S.th);if(m){const d=MS[m.d];let h=`<div class="row" style="margin:14px 0 6px"><button onclick="S.th=null;sfx('click');render()">‹</button><div class="av">${m.ic}</div><b>${m.n}</b></div><div class="bub c">${d.q}</div>`;if(m.done===null){h+=`<small>${t('quickReply')}</small>`+d.o.map((o,i)=>`<button class="opt" onclick="reply(${m.id},${i})">${o.t}</button>`).join('');h+=`<div class="free-reply"><small>${t('freeReply')}</small><textarea id="freeMsg" placeholder="..."></textarea><button class="pri" style="margin-top:6px" onclick="freeReplyMsg(${m.id})">${t('send')}</button></div>`}else{h+=`<div class="bub m">${esc(m.myReply||'')}</div><div class="bub c">${esc(m.custReply||'')}</div><div>${m.chips||''}</div>`}return h}}return `<h2>${t('msgTitle')}</h2>`+(S.msgs.length?S.msgs.map(m=>`<div class="card row" onclick="S.th=${m.id};sfx('click');render()" style="cursor:pointer"><div class="av">${m.ic}</div><div class="grow"><b>${m.n}</b> ${m.done===null?`<span class="chip r" style="margin:0">${t('newMsg')}</span>`:''}<br><small>${m.done===null?MS[m.d].q.slice(0,46)+'…':t('replied')}</small></div></div>`).join(''):`<div class="card"><small>${t('noMsg')}</small></div>`)}
 function fbTab(){const a=S.fbs,n=a.length,avg=n?a.reduce((x,y)=>x+y.s,0)/n:0;let h=`<h2>${t('fbTitle')}</h2><div class="card"><div class="row"><div style="text-align:center"><b style="font-size:34px">${n?f1(avg):'—'}</b><br><span class="st">${stars(Math.round(avg))}</span><br><small>${n} ${t('reviews')}</small></div><div class="grow">${[5,4,3,2,1].map(s=>{const c=a.filter(x=>x.s===s).length;return `<div class="row" style="gap:6px;font-size:12px"><span>${s}★</span><div class="bar grow" style="height:8px"><i style="width:${n?c/n*100:0}%"></i></div></div>`}).join('')}</div></div></div>`;h+=a.map((f,idx)=>`<div class="card"><span style="font-size:18px">${f.ic}</span> <b>${f.n}</b> <span class="st">${stars(f.s)}</span> <small>· ${t('day')} ${f.day}</small><br><span style="font-size:14px">“${esc(f.t)}”</span>${f.replied?`<div class="bub m" style="margin-top:6px">${esc(f.reply)}</div>`:`<button class="reply-btn" onclick="openReply(${idx})">${t('reply')}</button>`}</div>`).join('');return h}
 function openReply(idx){const f=S.fbs[idx];$('#modal').innerHTML=`<div class="mb"><div class="av">${f.ic}</div><h3>${t('reply')} ${esc(f.n)}</h3><p style="text-align:left">“${esc(f.t)}”</p><textarea id="rp" placeholder="${t('writeReply')}"></textarea><button class="o main" onclick="submitReply(${idx})">${t('send')}</button><button class="o" onclick="$('#modal').style.display='none'">${t('cancel')}</button></div>`;$('#modal').style.display='flex';sfx('click')}
-function submitReply(idx){const txt=($('#rp')?.value||'').trim();if(!txt){toast(currentLang==='en'?'Write something!':'Hãy viết gì đó!');return}S.fbs[idx].replied=true;S.fbs[idx].reply=txt;S.rating=clamp(S.rating+0.05,1,5);$('#modal').style.display='none';sfx('msg');save();toast(currentLang==='en'?'Reply sent! +0.05★':'Đã gửi phản hồi! +0,05★');render()}
+function submitReply(idx){const txt=($('#rp')?.value||'').trim();if(!txt){toast(currentLang==='en'?'Write something!':'Hãy viết gì đó!');return}S.fbs[idx].replied=true;S.fbs[idx].reply=txt;if(isRude(txt)){S.rating=clamp(S.rating-1,1,5);S.fbs[idx].s=1;$('#modal').style.display='none';sfx('bad');save();toast(currentLang==='en'?'😡 Rude reply! −1★':'😡 Trả lời thô tục! Bị trừ 1★');render();return}S.rating=clamp(S.rating+0.05,1,5);$('#modal').style.display='none';sfx('msg');save();toast(currentLang==='en'?'Reply sent! +0.05★':'Đã gửi phản hồi! +0,05★');render()}
 function render(){if(['title','guide','name'].includes(S.phase))return intro();const c={home,market,stock,up:upTab,msg:msgTab,fb:fbTab}[S.tab]();$('#app').innerHTML=`<div id="hd">${headHtml()}</div>${c}`;$('#tabs').innerHTML=tabsHtml()}
 
 function mk(){
