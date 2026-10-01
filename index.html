@@ -250,25 +250,9 @@ const TOP=[
 {id:'bo',n:'Bò nướng',n_en:'Grilled beef',e:'🐄',c:5000,for:['nuong']},
 {id:'hai',n:'Hải sản nướng',n_en:'Grilled seafood',e:'🦑',c:5500,for:['nuong']}
 ];
-// Nguyên liệu / topping phở (mở từ ngày 8 + mua gian hàng)
-const PHO=[
-{id:'pho_ban',n:'Bánh phở',n_en:'Pho noodles',e:'🍜',c:2000,pho:true},
-{id:'pho_dung',n:'Nước dùng',n_en:'Broth',e:'🥣',c:2500,pho:true},
-{id:'pho_hanh',n:'Hành',n_en:'Green onion',e:'🧅',c:500,pho:true},
-{id:'pho_quay',n:'Quẩy',n_en:'Fried dough',e:'🥖',c:1000,pho:true},
-{id:'pho_tom',n:'Tôm (phở)',n_en:'Shrimp (pho)',e:'🦐',c:4000,pho:true},
-{id:'pho_bo',n:'Bò (phở)',n_en:'Beef (pho)',e:'🥩',c:4500,pho:true},
-{id:'pho_ga',n:'Gà (phở)',n_en:'Chicken (pho)',e:'🍗',c:3500,pho:true},
-{id:'pho_duong',n:'Đường',n_en:'Sugar',e:'🍬',c:300,pho:true},
-{id:'pho_bot',n:'Bột ngọt',n_en:'MSG',e:'🧂',c:400,pho:true},
-{id:'pho_nem',n:'Hạt nêm',n_en:'Seasoning',e:'🧂',c:400,pho:true},
-{id:'pho_sup',n:'Súp nền',n_en:'Soup base',e:'🫙',c:1500,pho:true}
-];
-const PHO_PRICE=45000; // giá 1 tô phở bán
-const PHO_STALL_COST=4000000;
 const UT=[{id:'dua',n:'Đũa',n_en:'Chopsticks',e:'🥢',c:600},{id:'bat',n:'Bát',n_en:'Bowls',e:'🥣',c:1200}];
 let cart={}; // id -> {qty, kind:'d'|'t'|'u'|'p'}
-function allItems(){return [...D,...TOP,...PHO,...UT]}
+function allItems(){return [...D,...TOP,...UT]}
 function findItem(id){return allItems().find(x=>x.id===id)}
 function costOf(id){const it=findItem(id);return it?it.c:0}
 function sellOf(id){const it=findItem(id);if(!it)return 0;const v=S.sellPrice&&S.sellPrice[id];return v!=null?v:Math.round(it.c*2/500)*500}
@@ -277,7 +261,6 @@ if(!was&&sellOf(id)>=it.c*10){toast('🐶 Bán Rẻ thì lỗ mà Đắt Quá th
 function overpriced(){return [...D,...TOP].filter(x=>sellOf(x.id)>=x.c*10)}
 function dogWarn(){const o=overpriced();return o.length?`<div class="card" style="border-color:var(--bad);text-align:center"><b class="r">🐶 Bán Rẻ thì lỗ mà Đắt Quá thì chó cũng không ăn</b><br><small>Giá bán gấp 10 lần giá nhập: ${o.map(x=>x.e+' '+itemN(x)).join(', ')}. Vào 📦 Kho giảm giá xuống.</small></div>`:''}
 function sellCtl(id){const it=findItem(id),bad=sellOf(id)>=it.c*10;return `<div style="margin-top:6px;font-size:12px">💰 ${currentLang==='en'?'Sell price':'Giá bán'}: <button style="padding:2px 8px" onclick="setSell('${id}',-5000)">−−</button> <button style="padding:2px 9px" onclick="setSell('${id}',-500)">−</button> <b class="${bad?'r':''}">${fmt(sellOf(id))}</b> <button style="padding:2px 9px" onclick="setSell('${id}',500)">+</button> <button style="padding:2px 8px" onclick="setSell('${id}',5000)">++</button> <small>(${currentLang==='en'?'cost':'nhập'} ${fmt(it.c)})</small></div>${bad?'<div class="r" style="font-size:12px;font-weight:700;margin-top:4px">🐶 Bán Rẻ thì lỗ mà Đắt Quá thì chó cũng không ăn</div>':''}`}
-function phoUnlocked(){return S.day>=8&&S.phoStall}
 const UP=[
 {id:'seat',n:'Bàn ghế',n_en:'Tables',d:'+1 bàn: thêm 1 khách order cùng lúc',d_en:'+1 table: one more guest ordering at once',e:'🪑',max:5,b:300000},
 {id:'sec',n:'Bảo vệ',n_en:'Security',d:'Chặn khách bùng tiền',d_en:'Stops dine-and-dash',e:'💂',max:3,b:250000},
@@ -712,8 +695,6 @@ const w=currentLang==='en'
 <p>• Shippers: Gréb, Blue Ngon, Bê, Shịppé (10K/km, customer pays)</p>
 <p>• Online orders · Staff: Lan, Hùng, Minh</p>
 <p>• Report to police (day 7+): catch runaway or lose money</p>
-<p><b>Pho stall (day 8)</b></p>
-<p>• Buy stall 4M · Kitchen cook: noodles, broth, toppings, no-onion</p>
 <p><b>Market</b></p>
 <p>• Cart checkout · Adjust buy price per item</p>
 <p><b>Meta</b></p>
@@ -735,8 +716,6 @@ const w=currentLang==='en'
 <p>• Shipper: Gréb, Blue Ngon, Bê, Shịppé (10K/km, khách trả)</p>
 <p>• Đơn online · NV: Lan, Hùng, Minh</p>
 <p>• Báo Công an (ngày 7+): bắt được trả tiền hoặc mất tiền</p>
-<p><b>Gian hàng phở (ngày 8)</b></p>
-<p>• Mua gian 4M · Bếp: bánh, nước dùng, topping, không hành</p>
 <p><b>Chợ</b></p>
 <p>• Giỏ hàng + thanh toán · Chỉnh giá nhập từng món</p>
 <p><b>Hệ thống</b></p>
@@ -913,11 +892,11 @@ const RUDE_CUST=['Chủ quán gì mà chửi khách vậy?! Mình đánh giá 1 
 function analyzeFreeReply(txt){const t=txt.toLowerCase();let mood=0;const good=['cảm ơn','xin lỗi','giảm','tặng','miễn','voucher','ưu đãi','còn chỗ','được','ok','dạ','vui','chào','hẹn'];const bad=['không','hết','từ chối','không có','đắt','không nhận','kín','hết chỗ'];good.forEach(w=>{if(t.includes(w))mood++});bad.forEach(w=>{if(t.includes(w))mood--});return mood>0?'good':mood<0?'bad':'neutral'}
 const FREE_RESP={good:[{c:'Ôi cảm ơn quán nhiều! Mình sẽ ghé ngay 💕',m:80000,r:.12},{c:'Tuyệt vời quá, mình chốt luôn nha!',m:120000,r:.1},{c:'Quán dễ thương thế, mình giới thiệu bạn bè nữa!',m:60000,r:.15},{c:'Yay! Cảm ơn em nhiều ạ 🥰',m:50000,r:.08}],neutral:[{c:'Ok bạn, mình biết rồi.',m:20000,r:0},{c:'Cảm ơn thông tin nha.',m:10000,r:0},{c:'Mình sẽ cân nhắc thêm.',m:0,r:0},{c:'Ok em.',m:15000,r:.02}],bad:[{c:'Tiếc quá… mình đi quán khác vậy.',m:0,r:-.08},{c:'Hơi thất vọng, thôi vậy.',m:0,r:-.12},{c:'Ok, cảm ơn.',m:0,r:-.05},{c:'Vậy à… buồn nhỉ.',m:0,r:-.1}]};
 
-function defaultS(){return{name:'Buffet Nhà Mình',day:1,money:600000,rating:4,seats:8,price:49000,stock:{},phase:'title',tab:'home',g:0,spent:0,sum:null,up:{seat:0,sec:0,deco:0,ac:0,fr:0},msgs:[],mid:1,th:null,fbs:[],ut:{dua:30,bat:30},staff:{},online:false,upSub:'co',phoStall:false,buyPrice:{},sellPrice:{},refClaimed:false}}
+function defaultS(){return{name:'Buffet Nhà Mình',day:1,money:600000,rating:4,seats:8,price:49000,stock:{},phase:'title',tab:'home',g:0,spent:0,sum:null,up:{seat:0,sec:0,deco:0,ac:0,fr:0},msgs:[],mid:1,th:null,fbs:[],ut:{dua:30,bat:30},staff:{},online:false,upSub:'co',buyPrice:{},sellPrice:{},refClaimed:false}}
 function init(forceNew){
 // forceNew / từ loading → luôn hiện title; nút Tiếp tục mới load save
 if(forceNew===true){
-S=defaultS();D.forEach(d=>S.stock[d.id]=0);TOP.forEach(t=>S.stock[t.id]=0);PHO.forEach(p=>S.stock[p.id]=0);L=null;render();
+S=defaultS();D.forEach(d=>S.stock[d.id]=0);TOP.forEach(t=>S.stock[t.id]=0);L=null;render();
 if(soundOn)setTimeout(()=>{ensureAudio();startBGM()},500);
 return
 }
@@ -925,10 +904,10 @@ if(forceNew===false){
 // Tiếp tục từ save
 const loaded=load();
 if(loaded&&loaded.phase&&loaded.phase!=='title'){
-S=loaded;if(!S.ut)S.ut={dua:20,bat:20};if(!S.staff)S.staff={};if(S.online==null)S.online=false;if(S.phoStall==null)S.phoStall=false;if(!S.buyPrice)S.buyPrice={};
+S=loaded;if(!S.ut)S.ut={dua:20,bat:20};if(!S.staff)S.staff={};if(S.online==null)S.online=false;if(!S.buyPrice)S.buyPrice={};
 D.forEach(d=>{if(S.stock[d.id]==null)S.stock[d.id]=0});
 TOP.forEach(t=>{if(S.stock[t.id]==null)S.stock[t.id]=0});
-PHO.forEach(p=>{if(S.stock[p.id]==null)S.stock[p.id]=0});
+
 // Đang mở cửa nhưng không có state ngày → về chuẩn bị (tránh trang chủ trống)
 if(S.phase==='open'){S.phase='prep';S.tab='home'}
 if(!['title','guide','name','prep','open','end','bust'].includes(S.phase))S.phase='prep';
@@ -967,13 +946,11 @@ sfx('click');save();render()
 }
 function cartKind(id){
 if(UT.find(x=>x.id===id))return'u';
-if(PHO.find(x=>x.id===id))return'p';
 if(TOP.find(x=>x.id===id))return't';
 return'd'
 }
 function addCart(id,qty){
 qty=Math.max(1,parseInt(qty)||1);
-if(PHO.find(x=>x.id===id)&&!phoUnlocked()){toast(S.day<8?(currentLang==='en'?'Pho stall from day 8':'Gian hàng phở mở từ ngày 8'):(currentLang==='en'?'Buy pho stall first':'Cần mua gian hàng phở'));sfx('bad');return}
 cart[id]=(cart[id]||0)+qty;sfx('click');toast('+'+qty+' · '+itemN(findItem(id)));render()
 }
 function setCartQty(id,q){q=Math.max(0,parseInt(q)||0);if(q<=0)delete cart[id];else cart[id]=q;render()}
@@ -991,12 +968,6 @@ else S.stock[id]=(S.stock[id]||0)+n
 });
 cart={};sfx('coin');toast(currentLang==='en'?'Paid '+fmt(total):'Đã thanh toán '+fmt(total));
 S.marketView='shop';save();render()
-}
-function buyPhoStall(){
-if(S.phoStall){toast(currentLang==='en'?'Already owned':'Đã sở hữu');return}
-if(S.day<8){toast(currentLang==='en'?'Available from day 8':'Mở từ ngày 8');sfx('bad');return}
-if(S.money<PHO_STALL_COST){toast(currentLang==='en'?'Need 4M':'Cần 4M');sfx('bad');return}
-S.money-=PHO_STALL_COST;S.phoStall=true;sfx('coin');toast('🍜 Đã mở gian hàng phở!');save();render()
 }
 function upg(id){const u=UP.find(x=>x.id===id),lv=S.up[id],c=u.b*(lv+1);if(lv>=u.max||S.money<c)return;S.money-=c;S.up[id]++;S.seats=8+4*S.up.seat;sfx('coin');save();render()}
 function addMsg(k){const used=S.msgs.filter(m=>m.done===null).map(m=>m.d).concat(S.recentMs||[]);
@@ -1106,69 +1077,6 @@ function shopSvg(){return `<div class="shop-art"><svg viewBox="0 0 340 230" xmln
 <circle cx="127" cy="163" r="1" fill="#5c4033"/>
 <ellipse cx="125" cy="166" rx="1.5" ry="1" fill="#ff8db5"/>
 </svg></div>`}
-function phoStallSvg(){return `<div class="shop-art" style="max-width:320px;margin:0 auto"><svg viewBox="0 0 340 220" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<linearGradient id="psky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff8f0"/><stop offset="100%" stop-color="#ffe8d0"/></linearGradient>
-<linearGradient id="pwall" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fffaf5"/><stop offset="100%" stop-color="#ffe4c4"/></linearGradient>
-<linearGradient id="pawn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffb347"/><stop offset="100%" stop-color="#e67e22"/></linearGradient>
-</defs>
-<rect width="340" height="220" fill="url(#psky)"/>
-<ellipse cx="70" cy="40" rx="26" ry="11" fill="#fff" opacity=".75"/>
-<ellipse cx="260" cy="36" rx="30" ry="12" fill="#fff" opacity=".7"/>
-<ellipse cx="170" cy="205" rx="140" ry="14" fill="#e8c4a0" opacity=".45"/>
-<rect y="175" width="340" height="45" fill="#f5e0c8"/>
-<!-- stall body -->
-<rect x="55" y="85" width="230" height="95" rx="8" fill="url(#pwall)" stroke="#e8b87a" stroke-width="2"/>
-<!-- roof -->
-<path d="M40 88 H300 L285 115 H55 Z" fill="url(#pawn)"/>
-<circle cx="70" cy="115" r="6" fill="#c0392b"/><circle cx="100" cy="115" r="6" fill="#c0392b"/>
-<circle cx="130" cy="115" r="6" fill="#c0392b"/><circle cx="160" cy="115" r="6" fill="#c0392b"/>
-<circle cx="190" cy="115" r="6" fill="#c0392b"/><circle cx="220" cy="115" r="6" fill="#c0392b"/>
-<circle cx="250" cy="115" r="6" fill="#c0392b"/>
-<!-- sign -->
-<rect x="100" y="58" width="140" height="28" rx="8" fill="#c0392b"/>
-<text x="170" y="78" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" font-family="Baloo 2,Nunito,system-ui,sans-serif">🍜 PHỞ NGON</text>
-<!-- counter -->
-<rect x="70" y="145" width="200" height="28" rx="4" fill="#d4a574" stroke="#b8956a" stroke-width="1.5"/>
-<!-- bowls on counter -->
-<ellipse cx="110" cy="148" rx="18" ry="7" fill="#f5c16c"/>
-<ellipse cx="110" cy="145" rx="14" ry="5" fill="#e8a838"/>
-<path d="M100 145 Q110 138 120 145" stroke="#8b5a2b" stroke-width="1.5" fill="none"/>
-<ellipse cx="170" cy="148" rx="18" ry="7" fill="#f5c16c"/>
-<ellipse cx="170" cy="145" rx="14" ry="5" fill="#e8a838"/>
-<path d="M160 145 Q170 138 180 145" stroke="#8b5a2b" stroke-width="1.5" fill="none"/>
-<ellipse cx="230" cy="148" rx="18" ry="7" fill="#f5c16c"/>
-<ellipse cx="230" cy="145" rx="14" ry="5" fill="#e8a838"/>
-<!-- steam -->
-<path d="M108 130 Q106 122 110 118" stroke="#ccc" stroke-width="2" fill="none" opacity=".6"/>
-<path d="M168 128 Q166 120 170 116" stroke="#ccc" stroke-width="2" fill="none" opacity=".6"/>
-<path d="M228 130 Q226 122 230 118" stroke="#ccc" stroke-width="2" fill="none" opacity=".6"/>
-<!-- cook -->
-<circle cx="300" cy="130" r="14" fill="#ffdbac"/>
-<circle cx="295" cy="128" r="1.5" fill="#5a3a2a"/><circle cx="305" cy="128" r="1.5" fill="#5a3a2a"/>
-<path d="M296 135 Q300 138 304 135" stroke="#c07060" stroke-width="1.2" fill="none"/>
-<rect x="288" y="144" width="24" height="28" rx="4" fill="#e67e22"/>
-<!-- plant -->
-<ellipse cx="40" cy="165" rx="12" ry="8" fill="#7cb342"/>
-<rect x="36" y="168" width="8" height="12" fill="#a1887f"/>
-</svg></div>`}
-function previewPhoStall(){
-sfx('click');
-$('#modal').innerHTML=`<div class="mb" style="text-align:center">
-<h3>🍜 ${currentLang==='en'?'Pho stall preview':'Xem trước gian hàng phở'}</h3>
-${phoStallSvg()}
-<p style="font-size:13px;color:var(--mute);margin-top:8px">
-${S.phoStall
-?(currentLang==='en'?'Your pho stall is open!':'Gian hàng phở của bạn đã mở!')
-:(S.day>=8
-?(currentLang==='en'?`Buy for ${fmt(PHO_STALL_COST)} in Market`:`Mua ${fmt(PHO_STALL_COST)} ở Chợ (từ ngày 8)`)
-:(currentLang==='en'?'Unlocks from day 8':'Mở khóa từ ngày 8'))}
-</p>
-${!S.phoStall&&S.day>=8?`<button class="o main" onclick="buyPhoStall();$('#modal').style.display='none'">${currentLang==='en'?'Buy 4M':'Mua 4M'}</button>`:''}
-<button class="o" onclick="$('#modal').style.display='none'">${t('close')}</button>
-</div>`;
-$('#modal').style.display='flex'
-}
 function intro(){let h;$('#tabs').innerHTML='';if(S.phase==='title'){
 const saved=load();
 const hasSave=!!(saved&&saved.phase&&saved.phase!=='title');
@@ -1176,7 +1084,7 @@ const dayN=hasSave?(saved.day||'?'):'?';
 let btns='';
 if(hasSave){
 btns=`<button class="pri" onclick="sfx('click');init(false)">${t('continueDay')} ${dayN} ➜</button>
-<button style="margin-top:10px;width:100%;padding:12px;border-radius:14px;background:var(--line);color:var(--ink);font-weight:700" onclick="sfx('click');S=defaultS();D.forEach(d=>S.stock[d.id]=0);TOP.forEach(tp=>S.stock[tp.id]=0);PHO.forEach(p=>S.stock[p.id]=0);S.phase='guide';S.g=0;render()">${t('startNew')}</button>`;
+<button style="margin-top:10px;width:100%;padding:12px;border-radius:14px;background:var(--line);color:var(--ink);font-weight:700" onclick="sfx('click');S=defaultS();D.forEach(d=>S.stock[d.id]=0);TOP.forEach(tp=>S.stock[tp.id]=0);S.phase='guide';S.g=0;render()">${t('startNew')}</button>`;
 }else{
 btns=`<button class="pri" onclick="sfx('click');S.phase='guide';S.g=0;render()">${t('startNew')}</button>`;
 }
@@ -1198,10 +1106,6 @@ let h=`<div class="menu-board"><h3>${t('menuToday')}</h3>
 D.forEach(d=>{const q=S.stock[d.id]||0;h+=`<div class="ml"><span>${d.e} ${itemN(d)}${d.needTop?' +topping':''}${d.needOt?' +ớt':''}</span><span class="${q>0?'ok':'het'}">${q>0?'✓ '+q:t('out')}</span></div>`});
 h+=`<div class="sec">${t('tops')}</div>`;
 TOP.forEach(tp=>{const q=S.stock[tp.id]||0;h+=`<div class="ml"><span>${tp.e} ${itemN(tp)}</span><span class="${q>0?'ok':'het'}">${q>0?q:t('out')}</span></div>`});
-if(S.phoStall){
-h+=`<div class="sec">🍜 Phở · ${fmt(PHO_PRICE)}/tô</div>`;
-PHO.forEach(p=>{const q=S.stock[p.id]||0;h+=`<div class="ml"><span>${p.e} ${itemN(p)}</span><span class="${q>0?'ok':'het'}">${q>0?q:t('out')}</span></div>`});
-}
 h+=`<div class="sec">${t('utensils')}</div>
 <div class="ml"><span>${t('chopsticks')}</span><b>${S.ut.dua||0}</b></div>
 <div class="ml"><span>${t('bowls')}</span><b>${S.ut.bat||0}</b></div></div>`;
@@ -1216,7 +1120,6 @@ const tot=D.reduce((a,d)=>a+(S.stock[d.id]||0),0)+TOP.reduce((a,tp)=>a+(S.stock[
 h=`<div class="card" style="text-align:center;margin-top:12px"><div class="em" style="font-size:44px">🌸</div>
 <b>${t('day')} ${S.day} · ${t('readyDay')}</b><br>
 <small>${t('stockParts')} ${tot} · ${S.seats} ${t('seats')} · ${t('chopsticks')} ${S.ut.dua||0} · ${t('bowls')} ${S.ut.bat||0}</small>
-${S.phoStall?`<br><small>🍜 ${currentLang==='en'?'Pho stall open':'Gian hàng phở đã mở'}</small>`:(S.day>=8?`<br><small>🍜 ${currentLang==='en'?'Pho stall available in Market':'Có thể mua gian phở ở Chợ (4M)'}</small>`:'')}
 </div>
 ${menuBoardHtml()}${dogWarn()}
 <h2>${t('ticketPrice')}</h2>
@@ -1254,31 +1157,12 @@ let h=`<div class="card row" style="margin-top:8px"><div class="clock">🕐 ${L.
 if(maxSimul()>1){
 let tb='<div class="tables">';
 for(let i=0;i<maxSimul();i++){const c=L.custs.find(x=>x.table===i);
-if(c){const sm=c.pho?'🍜×'+c.bowls.length:c.order.map(o=>{const it=findItem(o.id);return it?it.e+'×'+o.qty:''}).join(' ');
+if(c){const sm=c.order.map(o=>{const it=findItem(o.id);return it?it.e+'×'+o.qty:''}).join(' ');
 tb+=`<div class="tbl ${L.cur===c?'sel':''}" onclick="selectCust(${c.id})"><b>🪑${i+1}${c.delivery?' 🛵':''}</b><span class="tav">${c.familyIcon||c.ic.join('')}</span><div class="bar pat"><i style="width:${Math.max(0,c.pat)}%"></i></div><small>${sm}</small></div>`}
 else tb+=`<div class="tbl empty"><b>🪑${i+1}</b><small>${currentLang==='en'?'Free':'Trống'}</small></div>`}
 h+=tb+'</div>'
 }
-if(L.cur&&L.cur.pho){
-const c=L.cur;
-const desc=c.bowls.map((b,i)=>{
-let s=`${i+1}. Phở`;
-if(b.top)s+=' '+itemN(findItem(b.top)||{n:b.top});
-if(b.noHanh)s+=' không hành';else if(b.hanh)s+=' +hành';
-if(b.quay)s+=' +quẩy';
-return s
-}).join('<br>');
-const avIcon=c.familyIcon||c.ic.join('');
-h+=`<div class="serve-area">
-<div class="cust-order">
-<div class="row"><div class="av" style="font-size:28px">${avIcon}</div>
-<div class="grow"><b>${c.n}</b> · 🍜 Phở ×${c.bowls.length}<br><small>${desc}</small></div></div>
-<div class="pat-wrap"><small>${t('patience')}</small><div class="bar pat"><i style="width:${Math.max(0,c.pat)}%"></i></div></div>
-</div>
-<p><small>${currentLang==='en'?'Open Pho Kitchen (button above police) to cook':'Mở Bếp phở (nút trên Báo CA) để chế biến'}</small></p>
-${L.phoMode?phoKitchenHtml(c):`<button class="pri" onclick="L.phoMode=true;L.phoTray=c.bowls.map(()=>({ban:0,dung:0,top:null,hanh:0,quay:0}));render()">🍜 ${currentLang==='en'?'Open kitchen':'Mở bếp phở'}</button>`}
-</div>`
-}else if(L.cur){
+if(L.cur){
 const c=L.cur;
 const orderParts=[];
 c.order.forEach(o=>{const item=findItem(o.id);if(item)orderParts.push(`${o.qty} ${item.e}${itemN(item)}`)});
@@ -1314,80 +1198,8 @@ ${trayMatch(c)&&((S.ut.dua||0)<needDua||(S.ut.bat||0)<needBat)?`<small class="r"
 else h+=`<div class="card" style="text-align:center;padding:20px"><div class="em">🪑</div><b>${t('waiting')}</b><br><small>${t('waitingTip')}${L.slow?' · ế':''}</small></div>`;
 h+=`<div class="log">${L.log.slice(-5).reverse().join('<br>')}</div>`;
 const polOk=S.day>=7&&!!L.pendingCrime;
-const phoBtn=S.phoStall||S.day>=8;
-h+=`<button class="police-btn" style="bottom:calc(152px + env(safe-area-inset-bottom,0px));background:linear-gradient(#ffb020,#e67e22);${!phoBtn?'opacity:.35':''}" ${phoBtn?'':'disabled'} onclick="if(S.phoStall){L.phoMode=!L.phoMode;if(L.phoMode&&L.cur&&L.cur.pho)L.phoTray=L.cur.bowls.map(()=>({ban:0,dung:0,top:null,hanh:0,quay:0}));render()}else toast(S.day<8?'Ngày 8+':'Cần mua gian hàng')" title="Bếp phở">🍜</button>`;
 h+=`<button class="police-btn ${polOk?'':'off'}" ${polOk?'':'disabled'} onclick="callPolice()" title="Báo Công an">👮${L.pendingCrime?'!':''}</button>`;
 return h
-}
-function phoKitchenHtml(c){
-if(!L.phoTray)L.phoTray=c.bowls.map(()=>({ban:0,dung:0,top:null,hanh:0,quay:0}));
-let h=`<div class="sec-label">🍜 Bếp phở</div>`;
-c.bowls.forEach((b,i)=>{
-const tr=L.phoTray[i];
-h+=`<div class="card"><b>Tô ${i+1}</b> <small>${b.top?itemN(findItem(b.top)||{n:''}):'trơn'}${b.noHanh?' · không hành':''}${b.quay?' · +quẩy':''}</small>
-<div class="row" style="flex-wrap:wrap;gap:4px;margin-top:6px">
-<button onclick="phoAdd(${i},'ban')" class="${tr.ban?'on':''}">🍜 Bánh ${(S.stock.pho_ban||0)}</button>
-<button onclick="phoAdd(${i},'dung')" class="${tr.dung?'on':''}">🥣 Dùng ${(S.stock.pho_dung||0)}</button>
-<button onclick="phoAdd(${i},'top')" class="${tr.top?'on':''}">${findItem(b.top||'pho_bo')?.e||'🥩'} ${(S.stock[b.top||'pho_bo']||0)}</button>
-<button onclick="phoAdd(${i},'hanh')" class="${tr.hanh?'on':''}">🧅 Hành</button>
-${b.noHanh?'<small class="r">Không hành!</small>':''}
-<button onclick="phoAdd(${i},'quay')" class="${tr.quay?'on':''}">🥖 Quẩy</button>
-</div></div>`
-});
-const ok=L.phoTray.some(t=>t.ban||t.dung||t.top||t.hanh||t.quay);
-h+=`<button class="bell" ${ok?'':'disabled'} onclick="servePho()">🔔 Giao phở</button>
-<button style="margin-top:6px;width:100%" onclick="L.phoMode=false;render()">Đóng bếp</button>`;
-return h
-}
-function phoAdd(i,k){
-if(!L||!L.phoTray)return;
-const tr=L.phoTray[i],b=L.cur.bowls[i];
-if(k==='ban'){if((S.stock.pho_ban||0)<1&&!tr.ban)return;tr.ban=tr.ban?0:1}
-else if(k==='dung'){if((S.stock.pho_dung||0)<1&&!tr.dung)return;tr.dung=tr.dung?0:1}
-else if(k==='top'){const tid=b.top||'pho_bo';if((S.stock[tid]||0)<1&&!tr.top)return;tr.top=tr.top?null:tid}
-else if(k==='hanh'){if((S.stock.pho_hanh||0)<1&&!tr.hanh)return;tr.hanh=tr.hanh?0:1}
-else if(k==='quay'){if((S.stock.pho_quay||0)<1&&!tr.quay)return;tr.quay=tr.quay?0:1}
-sfx('click');render()
-}
-function phoMatch(c){
-if(!L.phoTray||L.phoTray.length!==c.bowls.length)return false;
-if((S.ut.bat||0)<c.bowls.length)return false;
-for(let i=0;i<c.bowls.length;i++){
-const b=c.bowls[i],tr=L.phoTray[i];
-if(!tr.ban||!tr.dung)return false;
-if(b.top&&tr.top!==b.top)return false;
-if(b.noHanh&&tr.hanh)return false;
-if(b.hanh&&!tr.hanh)return false;
-if(b.quay&&!tr.quay)return false;
-}
-return true
-}
-function servePho(){
-if(!L||!L.cur||!L.cur.pho||!L.phoTray)return;
-const c=L.cur;
-if(!L.phoTray.some(t=>t.ban||t.dung||t.top||t.hanh||t.quay))return;
-if(!phoMatch(c)){
-if((S.ut.bat||0)<c.bowls.length){toast('Thiếu bát!');sfx('bad');return}
-L.phoTray=c.bowls.map(()=>({ban:0,dung:0,top:null,hanh:0,quay:0}));c.phoTray=L.phoTray;
-wrongServe(c);return}
-L.phoTray.forEach((tr,i)=>{
-const b=c.bowls[i];
-S.stock.pho_ban=(S.stock.pho_ban||0)-1;
-S.stock.pho_dung=(S.stock.pho_dung||0)-1;
-if(tr.top)S.stock[tr.top]=(S.stock[tr.top]||0)-1;
-if(tr.hanh)S.stock.pho_hanh=(S.stock.pho_hanh||0)-1;
-if(tr.quay)S.stock.pho_quay=(S.stock.pho_quay||0)-1
-});
-S.ut.bat-=c.bowls.length;
-const pay=c.bowls.length*PHO_PRICE;
-if(c.run){
-if(Math.random()<S.up.sec*.3){L.log.push('💂 Chặn được quỵt phở!')}
-else{L.runners++;L.lost+=pay;L.pendingCrime={n:c.n,pay,ic:c.familyIcon||c.ic.join('')};L.scores.push(1);L.log.push(`🏃 ${c.n} quỵt phở ${fmt(pay)}!`);removeCust(c);sfx('bad');save();render();return}
-}
-S.money+=pay;L.rev+=pay;L.served+=c.bowls.length;L.scores.push(4);
-S.fbs.unshift({n:c.n,ic:c.familyIcon||c.ic.join(''),s:4,t:review(4),day:S.day,replied:false,reply:''});
-L.log.push(`🍜 ${c.n} nhận ${c.bowls.length} tô phở · ${fmt(pay)}`);
-removeCust(c);sfx('bell');sfx('coin');save();render()
 }
 function trayMatch(c){if(!c||!L.tray)return false;for(const o of c.order){if((L.tray[o.id]||0)<o.qty)return false}for(const k of Object.keys(L.tray)){if(L.tray[k]>0&&!c.order.find(o=>o.id===k))return false}return true}
 function addToTray(id){if(!L||!L.cur)return;const q=S.stock[id]||0;const cur=(L.tray[id]||0);if(q<=cur)return;L.tray[id]=cur+1;sfx('click');if(S.tab==='home')render();else hd()}
@@ -1510,16 +1322,12 @@ return `<div class="card" style="${locked?'opacity:.45':''}">
 <input type="number" inputmode="numeric" id="${qid}" min="1" value="5" style="width:64px;padding:8px;border-radius:10px;border:2px solid var(--line);text-align:center" ${locked?'disabled':''}>
 <button onclick="addCart('${it.id}',document.getElementById('${qid}').value)" ${locked?'disabled':''} style="flex:1">🛒 ${currentLang==='en'?'Add':'Thêm giỏ'}</button>
 </div>
-${locked?`<small class="r">${S.day<8?(currentLang==='en'?'Day 8+':'Từ ngày 8'):(currentLang==='en'?'Need pho stall':'Cần gian hàng phở')}</small>`:''}
+${locked?`<small class="r">🔒</small>`:''}
 </div>`
 }
 function marketList(){
 const sec=(l,arr,lk)=>{const r=arr.filter(mkMatch);return r.length?`<div class="sec-label">${l}</div>`+r.map(x=>marketRow(x,lk)).join(''):''};
-const stall=(!mq||norm('gian hang pho').includes(norm(mq)))?`<div class="card" style="text-align:center"><b>🍜 ${currentLang==='en'?'Pho stall':'Gian hàng phở'}</b> · ${fmt(PHO_STALL_COST)}
-<br><small>${currentLang==='en'?'Buy from day 8. Preview anytime.':'Mua từ ngày 8. Xem trước được.'}</small>
-<div class="row" style="gap:8px;margin-top:10px;justify-content:center"><button onclick="previewPhoStall()">👁 ${currentLang==='en'?'Preview':'Xem trước'}</button>
-<button class="pri" style="width:auto;margin:0;padding:10px 16px" onclick="buyPhoStall()" ${S.phoStall||S.day<8||S.money<PHO_STALL_COST?'disabled':''}>${S.phoStall?(currentLang==='en'?'Owned':'Đã mua'):(S.day<8?(currentLang==='en'?'Day 8+':'Ngày 8+'):(currentLang==='en'?'Buy 4M':'Mua 4M'))}</button></div></div>`:'';
-const h=sec(t('mains')+' / '+(currentLang==='en'?'Drinks':'Nước'),D,false)+sec(t('tops'),TOP,false)+stall+sec('🍜 '+(currentLang==='en'?'Pho ingredients':'Nguyên liệu phở'),PHO,!phoUnlocked())+sec(t('utensils'),UT,false);
+const h=sec(t('mains')+' / '+(currentLang==='en'?'Drinks':'Nước'),D,false)+sec(t('tops'),TOP,false)+sec(t('utensils'),UT,false);
 return h||`<div class="card" style="text-align:center"><small>🔍 ${currentLang==='en'?'Nothing found':'Không tìm thấy món nào'}</small></div>`
 }
 function market(){
@@ -1554,8 +1362,7 @@ return `<h2>${t('stockTitle')}</h2><div class="card"><small>${t('keepPct')} ${ke
 +`<div class="sec-label">${t('tops')}</div>`
 +TOP.map(tp=>{const q=S.stock[tp.id]||0;return `<div class="card row"><div class="em">${tp.e}</div><div class="grow"><b>${itemN(tp)}</b> · <b class="${q?'':'r'}">${q}</b>${sellCtl(tp.id)}</div>
 <button onclick="buy('${tp.id}',-5,false)" ${q?'':'disabled'}>${t('sellBack5')}</button></div>`}).join('')
-+`<div class="sec-label">🍜 Phở</div>`
-+PHO.map(p=>{const q=S.stock[p.id]||0;return `<div class="card row"><div class="em">${p.e}</div><div class="grow"><b>${itemN(p)}</b> · <b class="${q?'':'r'}">${q}</b></div></div>`}).join('')
+
 +`<h2>${t('utensils')}</h2>`
 +UT.map(u=>{const q=S.ut[u.id]||0;return `<div class="card row"><div class="em">${u.e}</div><div class="grow"><b>${itemN(u)}</b> · <b class="${q?'':'r'}">${q}</b></div>
 <button onclick="buy('${u.id}',-10,true)" ${q?'':'disabled'}>${t('sellBack10')}</button></div>`}).join('')
@@ -1611,7 +1418,9 @@ function msgTab(){if(S.th){const m=S.msgs.find(x=>x.id===S.th);if(m){const d=MS[
 function fbTab(){const a=S.fbs,n=a.length,avg=n?a.reduce((x,y)=>x+y.s,0)/n:0;let h=`<h2>${t('fbTitle')}</h2><div class="card"><div class="row"><div style="text-align:center"><b style="font-size:34px">${n?f1(avg):'—'}</b><br><span class="st">${stars(Math.round(avg))}</span><br><small>${n} ${t('reviews')}</small></div><div class="grow">${[5,4,3,2,1].map(s=>{const c=a.filter(x=>x.s===s).length;return `<div class="row" style="gap:6px;font-size:12px"><span>${s}★</span><div class="bar grow" style="height:8px"><i style="width:${n?c/n*100:0}%"></i></div></div>`}).join('')}</div></div></div>`;h+=a.map((f,idx)=>`<div class="card"><span style="font-size:18px">${f.ic}</span> <b>${f.n}</b> <span class="st">${stars(f.s)}</span> <small>· ${t('day')} ${f.day}</small><br><span style="font-size:14px">“${esc(f.t)}”</span>${f.replied?`<div class="bub m" style="margin-top:6px">${esc(f.reply)}</div>`:`<button class="reply-btn" onclick="openReply(${idx})">${t('reply')}</button>`}</div>`).join('');return h}
 function openReply(idx){const f=S.fbs[idx];$('#modal').innerHTML=`<div class="mb"><div class="av">${f.ic}</div><h3>${t('reply')} ${esc(f.n)}</h3><p style="text-align:left">“${esc(f.t)}”</p><textarea id="rp" placeholder="${t('writeReply')}"></textarea><button class="o main" onclick="submitReply(${idx})">${t('send')}</button><button class="o" onclick="$('#modal').style.display='none'">${t('cancel')}</button></div>`;$('#modal').style.display='flex';sfx('click')}
 function submitReply(idx){const txt=($('#rp')?.value||'').trim();if(!txt){toast(currentLang==='en'?'Write something!':'Hãy viết gì đó!');return}S.fbs[idx].replied=true;S.fbs[idx].reply=txt;if(isRude(txt)){S.rating=clamp(S.rating-1,1,5);S.fbs[idx].s=1;$('#modal').style.display='none';sfx('bad');save();toast(currentLang==='en'?'😡 Rude reply! −1★':'😡 Trả lời thô tục! Bị trừ 1★');render();return}S.rating=clamp(S.rating+0.05,1,5);$('#modal').style.display='none';sfx('msg');save();toast(currentLang==='en'?'Reply sent! +0.05★':'Đã gửi phản hồi! +0,05★');render()}
-function render(){if(['title','guide','name'].includes(S.phase))return intro();const c={home,market,stock,up:upTab,msg:msgTab,fb:fbTab}[S.tab]();$('#app').innerHTML=`<div id="hd">${headHtml()}</div>${c}`;$('#tabs').innerHTML=tabsHtml()}
+function render(){if(['title','guide','name'].includes(S.phase)){const pb=document.getElementById('phoFloat');if(pb)pb.remove();return intro()}const c={home,market,stock,up:upTab,msg:msgTab,fb:fbTab}[S.tab]();$('#app').innerHTML=`<div id="hd">${headHtml()}</div>${c}`;$('#tabs').innerHTML=tabsHtml();
+if(!document.getElementById('phoFloat')){const b=document.createElement('button');b.id='phoFloat';b.className='police-btn';b.title='Tiệm phở';b.textContent='🍜';b.style.cssText='bottom:calc(152px + env(safe-area-inset-bottom,0px));background:linear-gradient(#ffb020,#e67e22)';b.onclick=()=>window.open('https://phohaloi.vercel.app/','_blank');document.body.appendChild(b)}
+}
 
 function mk(){
 let n,ic,ppl,familyIcon=null,delivery=false;
@@ -1624,22 +1433,6 @@ if(Math.random()<.2)ic.push(rnd(['👴','👵']));
 ppl=ic.length;familyIcon='👨‍👩‍👧'
 }else{const x=rnd(SOLO);n=cap(x[0]);ic=[x[1]];ppl=1}
 if(Math.random()<(S.online?0.4:0.15))delivery=true;
-// Đơn phở (nếu mở gian hàng)
-const canPho=phoUnlocked()&&(S.stock.pho_ban||0)>0&&(S.stock.pho_dung||0)>0&&(S.ut.bat||0)>0;
-if(canPho&&Math.random()<.28){
-const bowls=[];
-const bn=Math.min(ppl,1+Math.floor(Math.random()*Math.min(3,ppl)));
-for(let i=0;i<bn;i++){
-const topsAvail=['pho_tom','pho_bo','pho_ga'].filter(id=>(S.stock[id]||0)>0);
-const top=topsAvail.length?rnd(topsAvail):null;
-const noHanh=Math.random()<.35;
-const wantQuay=Math.random()<.4&&(S.stock.pho_quay||0)>0;
-const wantHanh=!noHanh&&Math.random()<.5&&(S.stock.pho_hanh||0)>0;
-bowls.push({top,noHanh,quay:wantQuay,hanh:wantHanh})
-}
-let runChance=0.05;if(S.day>=6)runChance=0.08+Math.min(0.25,(S.day-5)*0.025);
-return {n,ic,ppl,order:[],pho:true,bowls,pat:100,run:Math.random()<runChance,familyIcon,delivery:false}
-}
 const avail=av().filter(d=>!(d.needOt&&!(S.stock.ot>0)));
 const orderMap={};
 if(avail.length){
@@ -1688,18 +1481,18 @@ let runChance=0.05;
 if(S.day>=6)runChance=0.08+Math.min(0.25,(S.day-5)*0.025);
 if(delivery)runChance+=0.04;
 if(S.staff.online_nv&&delivery)runChance*=0.5;
-return {n,ic,ppl,order,pat:100,run:Math.random()<runChance,familyIcon,delivery,pho:false}
+return {n,ic,ppl,order,pat:100,run:Math.random()<runChance,familyIcon,delivery}
 }
 function maxSimul(){return (S.day>=2?2:1)+(S.up.seat||0)}
-function stashCur(){if(L&&L.cur){L.cur.tray=L.tray;L.cur.phoTray=L.phoTray;L.cur.phoMode=L.phoMode}}
-function selectCust(id){if(!L)return;const c=L.custs.find(x=>x.id===id);if(!c||L.cur===c)return;stashCur();L.cur=c;L.tray=c.tray||(c.tray={});L.phoTray=c.phoTray||null;L.phoMode=!!c.phoMode;sfx('click');render()}
-function removeCust(c){if(!L)return;L.custs=L.custs.filter(x=>x!==c);if(L.cur===c){L.cur=null;L.tray={};L.phoMode=false;L.phoTray=null}}
+function stashCur(){if(L&&L.cur){L.cur.tray=L.tray}}
+function selectCust(id){if(!L)return;const c=L.custs.find(x=>x.id===id);if(!c||L.cur===c)return;stashCur();L.cur=c;L.tray=c.tray||(c.tray={});sfx('click');render()}
+function removeCust(c){if(!L)return;L.custs=L.custs.filter(x=>x!==c);if(L.cur===c){L.cur=null;L.tray={}}}
 function openShop(){
 if(overpriced().length){toast('🐶 Bán Rẻ thì lỗ mà Đắt Quá thì chó cũng không ăn');sfx('bad');return}
-if(!av().length&&!(phoUnlocked()&&(S.stock.pho_ban||0)>0)){toast('Hãy nhập món ở 🛒 Chợ trước!');sfx('bad');return}
+if(!av().length){toast('Hãy nhập món ở 🛒 Chợ trước!');sfx('bad');return}
 if((S.ut.dua||0)<1||(S.ut.bat||0)<1){toast('Cần mua Đũa và Bát!');sfx('bad');return}
 const slow=Math.random()<0.1; // ~10% ngày ế
-S.phase='open';L={t:0,cur:null,custs:[],nid:1,tray:{},served:0,turned:0,rev:0,scores:[],log:[`🔔 ${esc(S.name)} mở cửa!`+(slow?' (Hôm nay vắng khách…)':'')],runners:0,lost:0,pop:0,evn:0,evc:0,clock:'10:00',pendingCrime:null,slow,phoMode:false,phoTray:null};
+S.phase='open';L={t:0,cur:null,custs:[],nid:1,tray:{},served:0,turned:0,rev:0,scores:[],log:[`🔔 ${esc(S.name)} mở cửa!`+(slow?' (Hôm nay vắng khách…)':'')],runners:0,lost:0,pop:0,evn:0,evc:0,clock:'10:00',pendingCrime:null,slow};
 if(slow)toast(currentLang==='en'?'Quiet day…':'Hôm nay quán hơi ế…');
 paused=false;sfx('bell');save();render();timer=setInterval(tick,TICK_MS)
 }
@@ -1714,9 +1507,9 @@ L.clock=`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
 L.pop=0;
 [...L.custs].forEach(c=>{c.pat-=(1.2+(S.price>60000?0.4:0)-S.up.ac*0.15-(S.staff.phucvu?0.25:0));if(c.pat<=0){L.turned++;L.scores.push(1);S.fbs.unshift({n:c.n,ic:c.familyIcon||c.ic.join(''),s:1,t:review(1),day:S.day,replied:false,reply:''});L.log.push(`😡 ${c.n} hết kiên nhẫn, bỏ về`);removeCust(c);sfx('bad')}});
 if(S.staff.phucvu&&Math.random()<.4){
-const c=L.custs.find(x=>!x.pho&&x.pat<90&&x.order.every(o=>(S.stock[o.id]||0)>=o.qty)&&(S.ut.dua||0)>=x.ppl&&(S.ut.bat||0)>=x.ppl);
+const c=L.custs.find(x=>x.pat<90&&x.order.every(o=>(S.stock[o.id]||0)>=o.qty)&&(S.ut.dua||0)>=x.ppl&&(S.ut.bat||0)>=x.ppl);
 if(c){stashCur();const prev=L.cur;L.cur=c;L.tray={};c.order.forEach(o=>L.tray[o.id]=o.qty);L.log.push('🧑‍🍳 Lan bưng món giúp bạn!');ringBell();
-if(prev&&L.custs.includes(prev)){L.cur=prev;L.tray=prev.tray||{};L.phoTray=prev.phoTray||null;L.phoMode=!!prev.phoMode}else{L.cur=null;L.tray={};L.phoTray=null;L.phoMode=false}
+if(prev&&L.custs.includes(prev)){L.cur=prev;L.tray=prev.tray||{}}else{L.cur=null;L.tray={}}
 if(L.pendingShip)return}}
 const outOfSets=(S.ut.dua||0)<1||(S.ut.bat||0)<1;
 const outOfFood=!av().length||outOfSets;
@@ -1732,7 +1525,7 @@ const free=maxSimul()-L.custs.length;
 for(let k=0;k<free;k++){
 if(Math.random()<p){
 const g=mk();
-if(g.order.length||g.pho){
+if(g.order.length){
 const used=L.custs.map(x=>x.table);let tb=0;while(used.includes(tb))tb++;
 g.id=L.nid++;g.table=tb;g.tray={};L.custs.push(g);
 if(maxSimul()===1){L.cur=g;L.tray=g.tray}
@@ -1796,7 +1589,6 @@ let keep=.5+.15*S.up.fr+(S.staff.bep?0.1:0);
 keep=Math.min(0.95,keep);
 D.forEach(d=>S.stock[d.id]=Math.floor((S.stock[d.id]||0)*keep));
 TOP.forEach(t=>S.stock[t.id]=Math.floor((S.stock[t.id]||0)*keep));
-PHO.forEach(p=>S.stock[p.id]=Math.floor((S.stock[p.id]||0)*keep));
 S.ut.dua=Math.floor((S.ut.dua||0)*.85);S.ut.bat=Math.floor((S.ut.bat||0)*.85);
 // Trả lương nhân viên
 let sal=0;
@@ -1834,66 +1626,6 @@ if(pct)pct.textContent=Math.floor(p)+'%';
 },70);
 })();
 document.body.addEventListener('click',()=>{ensureAudio();if(soundOn)startBGM()},{once:true});
-
-/* ===== BẾP PHỞ – patch UI bếp phở (chèn trước thẻ script đóng) ===== */
-const emptyBowl=()=>({ban:0,dung:0,top:null,hanh:0,quay:0});
-function togglePho(){
-if(!L)return;
-if(!S.phoStall){toast(S.day<8?'Ngày 8+':'Cần mua gian hàng phở');sfx('bad');return}
-L.phoMode=!L.phoMode;L.phoBowl=0;
-if(L.phoMode&&L.cur&&L.cur.pho&&(!L.phoTray||L.phoTray.length!==L.cur.bowls.length))L.phoTray=L.cur.bowls.map(emptyBowl);
-sfx('click');render()
-}
-function phoKitchenHtml(c){
-const i=c?Math.min(L.phoBowl||0,c.bowls.length-1):0;
-if(c&&(!L.phoTray||L.phoTray.length!==c.bowls.length))L.phoTray=c.bowls.map(emptyBowl);
-const tr=c?L.phoTray[i]:null;
-let h=`<div class="serve-area">`;
-if(c){
-const desc=c.bowls.map((b,k)=>`${k+1}. Phở${b.top?' '+itemN(findItem(b.top)||{n:b.top}):''}${b.noHanh?' không hành':(b.hanh?' +hành':'')}${b.quay?' +quẩy':''}`).join('<br>');
-h+=`<div class="cust-order"><div class="row"><div class="av" style="font-size:28px">${c.familyIcon||c.ic.join('')}</div><div class="grow"><b>${c.n}</b> · 🍜 Phở ×${c.bowls.length}<br><small>${desc}</small></div></div>
-<div class="pat-wrap"><small>${t('patience')}</small><div class="bar pat"><i style="width:${Math.max(0,c.pat)}%"></i></div></div></div>
-<div class="row" style="gap:6px;margin-bottom:6px">${c.bowls.map((_,k)=>`<button style="flex:1;${k===i?'background:var(--acc);color:#fff':''}" onclick="L.phoBowl=${k};render()">Tô ${k+1}</button>`).join('')}</div>`;
-}else h+=`<div class="cust-order"><b>🍜 Bếp phở</b><br><small>Chọn bàn có khách phở (🍜) để lên món</small></div>`;
-const btn=(id,k)=>{const it=findItem(id),q=S.stock[id]||0,on=tr&&(k==='top'?tr.top===id:tr[k]);
-return `<div class="dish-btn ${q<=0?'dis':(on?'on':'')}" onclick="phoAdd('${k}','${id}')"><span class="qty-badge">${q}</span><span class="em">${it.e}</span>${itemN(it)}<br><small>${on?'✓':t('pick')}</small></div>`};
-h+=`<div class="sec-label">Nền phở</div><div class="dish-grid">${btn('pho_ban','ban')}${btn('pho_dung','dung')}</div>
-<div class="sec-label">Topping</div><div class="dish-grid">${['pho_tom','pho_bo','pho_ga'].map(id=>btn(id,'top')).join('')}</div>
-<div class="sec-label">Thêm</div><div class="dish-grid">${btn('pho_hanh','hanh')}${btn('pho_quay','quay')}</div>`;
-const chosen=tr?[tr.ban&&'pho_ban',tr.dung&&'pho_dung',tr.top,tr.hanh&&'pho_hanh',tr.quay&&'pho_quay'].filter(Boolean):[];
-const any=c&&L.phoTray.some(x=>x.ban||x.dung||x.top||x.hanh||x.quay);
-h+=`<div class="dock"><div class="tray">${chosen.map(id=>`<span class="tray-item">${findItem(id).e}</span>`).join('')||`<small style="color:var(--mute)">${t('noPick')}</small>`}
-${chosen.length?`<button style="margin-left:auto;padding:4px 10px;font-size:12px" onclick="L.phoTray[${i}]=emptyBowl();render()">${t('clearTray')}</button>`:''}</div>
-<button class="bell" ${any?'':'disabled'} onclick="servePho()">🔔 Giao phở</button>
-<button style="margin-top:6px;width:100%" onclick="L.phoMode=false;render()">Đóng bếp</button></div></div>`;
-return h
-}
-function phoAdd(k,id){
-if(!L||!L.cur||!L.cur.pho||!L.phoTray){toast('Chọn bàn có khách phở trước');sfx('bad');return}
-const tr=L.phoTray[Math.min(L.phoBowl||0,L.phoTray.length-1)];
-if(k==='top'){if(tr.top===id)tr.top=null;else{if((S.stock[id]||0)<1)return;tr.top=id}}
-else{if(!tr[k]&&(S.stock[id]||0)<1)return;tr[k]=tr[k]?0:1}
-sfx('click');render()
-}
-function selectCust(id){if(!L)return;const c=L.custs.find(x=>x.id===id);if(!c||L.cur===c)return;stashCur();L.cur=c;L.tray=c.tray||(c.tray={});L.phoTray=c.phoTray||(c.pho?c.bowls.map(emptyBowl):null);L.phoBowl=0;sfx('click');render()}
-function removeCust(c){if(!L)return;L.custs=L.custs.filter(x=>x!==c);if(L.cur===c){L.cur=null;L.tray={};L.phoBowl=0;L.phoTray=null}}
-const _serve0=serveHtml;
-serveHtml=function(){
-if(!L)return '';
-const cur=L.cur;let h;
-if(L.phoMode){
-L.cur=null;
-try{h=_serve0()}finally{L.cur=cur}
-h=h.replace(/<div class="card" style="text-align:center;padding:16px"><div class="em">👆<\/div>[\s\S]*?<\/b><\/div>/,'');
-if(cur)h=h.replace(`class="tbl " onclick="selectCust(${cur.id})"`,`class="tbl sel" onclick="selectCust(${cur.id})"`);
-const k=phoKitchenHtml(cur&&cur.pho?cur:null);
-const i=h.indexOf('<div class="log">');
-h=i<0?h+k:h.slice(0,i)+k+h.slice(i)
-}else h=_serve0();
-return h.replace(/onclick="L\.phoMode=true;[^"]*"/,'onclick="togglePho()"').replace(/onclick="if\(S\.phoStall\)\{[^"]*"/,'onclick="togglePho()"')
-};
-const _tick0=tick;
-tick=function(){const pm=L?L.phoMode:undefined;_tick0();if(L&&pm!==undefined)L.phoMode=pm};
 
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
