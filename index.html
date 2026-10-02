@@ -1115,7 +1115,7 @@ cart={};sfx('coin');toast(currentLang==='en'?'Paid '+fmt(total):'Đã thanh toá
 S.marketView='shop';save();render()
 }
 const SEATP=[5e6,1e8,1e9,1e10,1e11,2.5e11,5e11,7.5e11,1e12];
-const upCost=(u,lv)=>u.id==='seat'?SEATP[Math.max(0,Math.min(8,((4+lv)>>2)-1))]/4:u.b*(lv+1);
+const upCost=(u,lv)=>u.id==='seat'?Math.round(SEATP[Math.max(0,Math.min(8,((4+lv)>>2)-1))]/4/2*(1+0.15*(lv&3))/1000)*1000:u.b*(lv+1);
 function upg(id){if(id==='stage'&&!S.up.seat){toast('Mở tầng 2 trước (Bàn ghế)');sfx('bad');return}const u=UP.find(x=>x.id===id),lv=S.up[id],c=upCost(u,lv);if(lv>=u.max||S.money<c)return;S.money-=c;led('out','Nâng cấp quán',c);S.up[id]++;S.seats=(4+S.up.seat)*2;sfx('coin');save();render()}
 function addMsg(k){const used=S.msgs.filter(m=>m.done===null).map(m=>m.d).concat(S.recentMs||[]);
 let pool=MS.map((_,i)=>i).filter(i=>!used.includes(i));if(!pool.length){S.recentMs=[];pool=MS.map((_,i)=>i)}
