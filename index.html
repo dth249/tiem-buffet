@@ -367,7 +367,7 @@ function overpriced(){return [...D,...TOP].filter(x=>sellOf(x.id)>=x.c*10)}
 function dogWarn(){const o=overpriced();return o.length?`<div class="card" style="border-color:var(--bad);text-align:center"><b class="r">🐶 Bán Rẻ thì lỗ mà Đắt Quá thì chó cũng không ăn</b><br><small>Giá bán gấp 10 lần giá nhập: ${o.map(x=>x.e+' '+itemN(x)).join(', ')}. Vào 📦 Kho giảm giá xuống.</small></div>`:''}
 function sellCtl(id){const it=findItem(id),bad=sellOf(id)>=it.c*10;return `<div style="margin-top:6px;font-size:12px">💰 ${currentLang==='en'?'Sell price':'Giá bán'}: <button style="padding:2px 8px" onclick="setSell('${id}',-5000)">−−</button> <button style="padding:2px 9px" onclick="setSell('${id}',-500)">−</button> <b class="${bad?'r':''}">${fmt(sellOf(id))}</b> <button style="padding:2px 9px" onclick="setSell('${id}',500)">+</button> <button style="padding:2px 8px" onclick="setSell('${id}',5000)">++</button> <small>(${currentLang==='en'?'cost':'nhập'} ${fmt(it.c)})</small></div>${bad?'<div class="r" style="font-size:12px;font-weight:700;margin-top:4px">🐶 Bán Rẻ thì lỗ mà Đắt Quá thì chó cũng không ăn</div>':''}`}
 const UP=[
-{id:'seat',n:'Bàn ghế',n_en:'Tables',d:'Mua thêm 1 bàn. Đủ 4 bàn mở 1 tầng mới, tối đa 40 bàn = 10 tầng. T2 sân khấu · T3 xiếc · T4-10 VIP',d_en:'Buy +1 table. 40 tables = 10 floors',e:'🪑',max:36,b:300000},
+{id:'seat',n:'Bàn ghế',n_en:'Tables',d:'Mua thêm 1 bàn là khách lên tầng đó ngay, tối đa 40 bàn = 10 tầng. T2 sân khấu · T3 xiếc (mở sau cũng được) · T4-10 VIP cần thuê phục vụ',d_en:'Buy +1 table. 40 tables = 10 floors',e:'🪑',max:36,b:300000},
 {id:'stage',n:'Sân khấu',n_en:'Stage',d:'Đặt ở tầng 2, cần thuê vũ công/ca sĩ để mở bàn tầng 2',d_en:'Floor-2 stage',e:'🎭',max:1,b:2000000},
 {id:'sec',n:'Bảo vệ',n_en:'Security',d:'Chặn khách bùng tiền',d_en:'Stops dine-and-dash',e:'💂',max:3,b:250000},
 {id:'deco',n:'Trang trí',n_en:'Decor',d:'Khách đông và hài lòng hơn',d_en:'More guests & happier',e:'🌸',max:3,b:300000},
@@ -1751,7 +1751,7 @@ STAFF.push(
 {id:'xiec',name:'Bốp Bốp',n:'Nghệ sĩ xiếc',n_en:'Acrobat',e:'🤹',fl:3,d:'Biểu diễn xiếc ở tầng 3. Lương 600K/ngày.',d_en:'Circus act on floor 3. 600K/day.',hire:1500000,sal:600000});
 for(let f=4;f<=10;f++)STAFF.push({id:'vip'+f,name:'Quản gia T'+f,n:'Phục vụ VIP tầng '+f,n_en:'VIP waiter F'+f,e:'🤵',fl:f,d:'Phục vụ riêng, bưng đồ ăn tới tận bàn khách VIP tầng '+f+'. Lương '+Math.round((100000+f*30000)/1000)+'K/ngày.',d_en:'Private waiter, floor '+f,hire:500000+f*150000,sal:100000+f*30000});
 function lockWhy(st){if(!st.fl)return '';if(floorsN()<st.fl)return 'Mở tầng '+st.fl+' trước (🔧 Bàn ghế)';if(st.fl===2&&!(S.up&&S.up.stage))return 'Mua sân khấu trước (🔧)';return ''}
-function floorOk(f){if(f<=1)return true;if(f===2)return !!(S.up.stage&&(S.staff.vu||S.staff.casi));if(f===3)return !!S.staff.xiec;return !!S.staff['vip'+f]}
+function floorOk(f){if(f<=1)return true;if(f===2||f===3)return true;return !!S.staff['vip'+f]}
 function readyN(){let n=1;for(let f=2;f<=floorsN();f++){if(floorOk(f))n=f;else break}return n}
 function billOf(c){const base=S.price+(c.plate||[]).reduce((a,id)=>a+sellOf(id),0),fee=Math.round(base*Math.max(0,c.tbl>>2)/100);return{base,fee,total:base+fee}}
 function entBonus(c){const f=(c.tbl>>2)+1;if(f===2)return(S.staff.vu?.3:0)+(S.staff.casi?.5:0);if(f===3)return .6;return f>3?.8:0}
